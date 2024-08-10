@@ -1,0 +1,668 @@
+* {
+  border: none;
+  outline: none;
+  text-decoration: none;
+  font-family: 'Blinker';
+}
+
+input{
+  box-shadow: none !important;
+}
+
+input:focus{
+  box-shadow: none !important;
+  border: #ff6c44 1px solid !important;
+}
+
+/* ================================================Login CSS==================================================== */
+
+.colored-button {
+  background-color: #ff6c44;
+  border-color: #ff6c44;
+  color: white;
+}
+
+.colored-button:hover {
+  background-color: #cc5636;
+  border-color: #cc5636;
+  color: white;
+}
+
+.form-check-input:checked{
+  border-color: #ff6c44;
+  background-color: #ff6c44;
+}
+
+a {
+  text-decoration: none;
+  color: #37B5DF;
+}
+
+/* ================================================Sidebar CSS==================================================== */
+
+.side * {
+  padding: 0;
+}
+
+.side{
+  margin: 0;
+  position: fixed;
+  top:0;
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  width: 80px;
+  overflow: hidden;
+  transition: width 0.2s linear;
+  box-shadow: 0 20px 35px rgba(0,0,0,0.1);
+  z-index: 30;
+  background-color: white;
+}
+
+.logo{
+  text-align: center;
+  display: flex;
+  transition: all 0.5s ease;
+  cursor: default;
+}
+
+.logo img{
+  height: 55px;
+  margin-left: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.side a{
+  position: relative;
+  color: black;
+  font-size: 16px;
+  display: flex;
+  width: 220px;
+  padding: 10px;
+  font-family: Blinker, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.side a:hover{
+  background-color: rgb(243, 243, 243);
+}
+
+.side a span{
+  margin-left: 10px;
+  margin-top: 2px;
+}
+
+a.active{
+  color: #ff6c44;
+  background-color: #ff6c4440;
+}
+a.active .fas{
+  color: #ff6c44;
+}
+a.active:hover{
+  text-decoration: none;
+  background-color: #ff6d4465;
+}
+.side .fas{
+  position: relative;
+  width: 60px;
+  height: 40px;
+  top: 12px;
+  font-size: 20px;
+  text-align: center;
+}
+.nav-item{
+  position: relative;
+  top: 8px;
+}
+
+.side a .order-number{
+  background-color: black;
+  margin-left: 24px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding-right: 8px;
+  padding-top: 2px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+.side a.active .order-number{
+  background-color: #ff6c44;
+}
+
+.side:hover{
+  width: 220px;
+  transition: all 0.5s ease;
+}
+
+.indicator{
+  transition: right 0.2s linear;
+}
+
+.side:hover a.active .indicator, .side:hover a.active:hover .indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #ff6c44;
+}
+
+.side:hover a:hover .indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+}
+
+.side a.active .indicator {
+  position: absolute;
+  right: 140px;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #ff6c44;
+}
+
+.side:hover a:hover .indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: rgb(197, 197, 197);
+}
+
+.side .logout{
+  position: absolute;
+  bottom: 0;
+  color: red;
+  transition: all 200ms ease-in-out;
+}
+
+.side .logout:hover{
+  background-color: red;
+  color: white;
+  text-decoration: none;
+}
+
+/* ================================================Navbar CSS==================================================== */
+
+.navbar {
+  margin-left: 106px;
+  margin-right: 10px;
+  z-index: 20
+}
+
+.navbar .box{
+  background-color: #fff;
+  width: 50%;
+  height: 50px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 20px;
+}
+.navbar input{
+  width: 94%;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 18px;
+}
+
+.navbar input:focus{
+  border: none !important;
+  outline: none !important;
+  background: none !important;
+}
+
+.navbar button:hover{
+  color: #ff6c44;
+  cursor: pointer;
+}
+
+.navbar .nav-button{
+  background-color: #fff;
+  border-radius: 50px;
+  height: 50px;
+  width: 50px;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  margin-right: 14px;
+}
+
+.horizontal-bar{
+  margin: 16px 26px 16px 106px;
+  border-width: 2px;
+  border-style: solid; 
+  border-radius: 5px;
+  opacity: 1;
+  color:#fff;
+}
+
+/* ================================================Common CSS==================================================== */
+
+.outer-container{
+  margin-left: 106px;
+  margin-top: 16px;
+  margin-right: 26px;
+}
+
+/* =================================================Menu CSS===================================================== */
+
+.outer-container .categories {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 22px;
+  padding: 14px 14px 8px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.outer-container .categories .category-item-container {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 8px;
+  margin-bottom: 8px;
+}
+
+.outer-container .categories .category-item-container .category-item {
+  width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 14px;
+}
+
+.outer-container .categories .category-item-container .category-item:hover .image {
+  transform: scale(1.1);
+}
+
+.outer-container .categories .category-item-container .category-item:hover .name {
+  transform: scale(1.1);
+}
+
+.outer-container .categories .category-item-container .category-item.active:hover .image {
+  transform: none;
+}
+
+.outer-container .categories .category-item-container .category-item.active:hover .name {
+  transform: none;
+}
+
+.outer-container .categories .category-item-container .category-item.active .image {
+  background-color: #ff6c44;
+  scale: 1.1;
+}
+
+.outer-container .categories .category-item-container .category-item.active .name {
+  color: #ff6c44;
+  font-weight: bold;
+  scale: 1.1;
+}
+
+.outer-container .categories .category-item-container .category-item .image {
+  width: 100%;
+  height: 56px;
+  background-color: #eee;
+  border-radius: 16px;
+  transition: transform 0.2s ease-in-out;
+  padding: 10px;
+  
+}
+
+.outer-container .categories .category-item-container .category-item .image img{
+  width: 36px;
+  height: 36px;
+}
+
+.outer-container .categories .category-item-container .category-item .name {
+  text-align: center;
+  padding-top: 8px;
+  text-wrap: wrap;
+  line-height: 13px;
+  font-size: 12px;
+  transition: transform 0.2s ease-in-out;
+  width: 56px;
+  height: auto;
+}
+
+.title-container {
+  margin-bottom: 16px;
+  margin-left: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.title-container span {
+  font-size: 18px;
+  font-weight: bold;
+  margin: auto auto auto 0px;
+}
+
+.title-container button {
+  background-color: #ff6c44;
+  border-radius: 12px;
+  padding: 4px 12px;
+  margin-left: auto;
+  transition: scale 0.2s ease-in-out;
+}
+
+.title-container button span, .title-container button i{
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.title-container button:hover {
+  scale: 1.1;
+}
+
+.delete-link{
+  --bs-dropdown-link-active-bg: rgb(255, 156, 156);
+}
+
+.outer-container .food-items {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 22px;
+  margin-top: 26px;
+  padding: 26px 0px 0px 26px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.outer-container .food-items .item-container{
+  min-width: 250px;
+  margin-right: 26px;
+  margin-bottom: 26px;
+}
+
+.outer-container .food-items .item-container .image{
+  margin-bottom: -60px;
+  margin-left: 22px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.outer-container .food-items .item-container .image img{
+  width: 120px;
+}
+
+.outer-container .food-items .item-container .info-container{
+  width: 100%;
+  background-color: #eee;
+  border-radius: 30px;
+  border-top-right-radius: 130px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 22px 16px 22px;
+}
+
+.outer-container .food-items .item-container .info{
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  min-height: 127px;
+}
+
+.outer-container .food-items .item-container .add{
+  margin: 55px 0 5px;
+  display: flex;
+  flex-direction: column;
+  min-height: 127px;
+  transition: color 0.3s ease-in-out;
+  color: black;
+}
+
+.outer-container .food-items .item-container .add:hover{
+  color: #ff6c44;
+}
+
+.outer-container .food-items .item-container .info .name{
+  font-size: 24px;
+  font-weight: bolder;
+  text-wrap: wrap;
+  line-height: 25px;
+}
+
+.price{
+  margin-top: 8px;
+  display: flex;
+}
+
+.currency{
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff6c44;
+  margin-right: 4px;
+  vertical-align: top;
+}
+
+.amount{
+  font-size: 20px;
+  font-weight: 600;
+  color: #ff6c44;
+}
+
+.outer-container .food-items .item-container .info .bottom{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.outer-container .food-items .item-container .info .time-rating{
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.outer-container .food-items .item-container .info .time-rating i{
+  margin: 4px 6px 4px 0px;
+}
+
+.outer-container .food-items .item-container .info .bottom button{
+  width: 32px;
+  height: 32px;
+  color: white;
+  background-color: #ff6c44;
+  border-radius: 12px;
+  transition: scale 0.2s ease-in-out;
+  font-size: 14px;
+}
+
+.outer-container .food-items .item-container .info .bottom button:hover{
+  scale: 1.1;
+}
+
+.modal {
+  --bs-modal-border-radius: 0px;
+}
+
+.modal-footer button {
+  color: white;
+  background-color: #ff6c44;
+  transition: scale 0.2s ease-in-out;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.modal-footer button:hover{
+  color: white;
+  background-color: #cc5636;
+}
+
+
+/* =================================================Order CSS===================================================== */
+
+.stats-container{
+  display: flex;
+  margin: 8px;
+  padding: 8px;
+  align-items: center;
+}
+
+.stats-container .stats-icon{
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.stats-container .stats-icon i{
+  font-size: 24px;
+}
+
+.stats-container .stats-detail{
+  margin-left: 8px;
+  margin-right: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-container .stats-detail .number {
+  font-size: 28px;
+  font-weight: bold;
+  height: 34px;
+}
+
+.stats-container .stats-detail .name {
+  font-size: 12px;
+  color: #999;
+}
+
+.table-arrangement {
+  flex: 1;
+}
+
+.table-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.each-table {
+  width: 70px;
+  height: 70px;
+  background-color: #eee;
+  border-radius: 12px;
+  margin-right: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  cursor: pointer;
+}
+
+.each-table.unseen{
+  background-color: rgba(255, 94, 94, 0.5);
+}
+
+.each-table.seen{
+  background-color: rgba(255, 108, 68, 0.5);
+}
+
+.each-table.completed{
+  background-color: rgba(74, 188, 195, 0.44);
+}
+
+.each-table.active.unseen{
+  border: 4px solid red;
+}
+
+.each-table.active.seen{
+  border: 4px solid rgb(255, 108, 68);
+}
+
+.each-table.active.completed{
+  border: 4px solid rgb(74, 188, 195);
+}
+
+.table{
+  --bs-table-bg: transparent
+}
+
+.table-number {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.table-request{
+  background-color: #eee;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-container .filter-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 8px;
+  width: 100px;
+}
+
+.filter-container .filter-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: calc(100% - 100px);
+}
+
+input[type="date"],
+input[type="range"] {
+  border: 1px solid #ff6c44;
+  border-radius: 10px;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.filter-value span {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.filter-container .filter-value .filter-container {
+  margin-right: 10px;
+}
+
+/* Additional Styling for Specific Elements */
+input[type="checkbox"]:checked + label {
+  font-weight: bold;
+  color: #ff6c44; /* Primary color for checked labels */
+}
