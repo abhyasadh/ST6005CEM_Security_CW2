@@ -1,13 +1,39 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const foodController = require("../controllers/foodController");
 const { authGuardAdmin } = require('../middleware/authGuard');
 
-router.post("/create-food", authGuardAdmin, foodController.createFood)
-router.get("/get-foods", foodController.getAllFood)
-router.get("/get-selected/:categoryId", foodController.getSelectedFood)
-router.put("/unavailable/:id", authGuardAdmin, foodController.unavailableFood)
-router.put("/update-food/:id", authGuardAdmin, foodController.updateFood)
-router.delete("/delete-food/:id", authGuardAdmin, foodController.deleteFood)
-router.get("/search", foodController.getSearchedFood)
+// Handler for method not allowed
+function methodNotAllowed(req, res) {
+    res.status(405).json({ message: "Method Not Allowed" });
+}
+
+router.route("/create-food")
+    .post(authGuardAdmin, foodController.createFood)
+    .all(methodNotAllowed);
+
+router.route("/get-foods")
+    .get(foodController.getAllFood)
+    .all(methodNotAllowed);
+
+router.route("/get-selected/:categoryId")
+    .get(foodController.getSelectedFood)
+    .all(methodNotAllowed);
+
+router.route("/unavailable/:id")
+    .put(authGuardAdmin, foodController.unavailableFood)
+    .all(methodNotAllowed);
+
+router.route("/update-food/:id")
+    .put(authGuardAdmin, foodController.updateFood)
+    .all(methodNotAllowed);
+
+router.route("/delete-food/:id")
+    .delete(authGuardAdmin, foodController.deleteFood)
+    .all(methodNotAllowed);
+
+router.route("/search")
+    .get(foodController.getSearchedFood)
+    .all(methodNotAllowed);
 
 module.exports = router;

@@ -2,20 +2,49 @@ const router = require('express').Router();
 const billController = require("../controllers/billController");
 const { authGuardAdmin } = require('../middleware/authGuard');
 
-router.post("/create-order", billController.createBill)
-router.put("/add-to-order/:billId", billController.addToBill)
+// Handler for method not allowed
+function methodNotAllowed(req, res) {
+    res.status(405).json({ message: "Method Not Allowed" });
+}
 
-router.get("/get-table-orders/:tableId", authGuardAdmin, billController.getBillsByTable)
-router.get("/get-history/:date", authGuardAdmin, billController.getHistory)
-router.get("/get-summary", authGuardAdmin, billController.getCheckedOutBillsSummary)
+router.route("/create-order")
+    .post(billController.createBill)
+    .all(methodNotAllowed);
 
-router.put("/update-status/:id", authGuardAdmin, billController.updateStatus)
-router.put("/update-payment/:id", billController.updatePaymentStatus)
-router.put("/checkout/:id", billController.updateCheckout)
+router.route("/add-to-order/:billId")
+    .put(billController.addToBill)
+    .all(methodNotAllowed);
 
-router.delete("/delete-order/:id", authGuardAdmin, billController.deleteOrder)
+router.route("/get-table-orders/:tableId")
+    .get(authGuardAdmin, billController.getBillsByTable)
+    .all(methodNotAllowed);
 
+router.route("/get-history/:date")
+    .get(authGuardAdmin, billController.getHistory)
+    .all(methodNotAllowed);
 
-router.get("/get-orders/:userId", billController.getUserOrder)
+router.route("/get-summary")
+    .get(authGuardAdmin, billController.getCheckedOutBillsSummary)
+    .all(methodNotAllowed);
+
+router.route("/update-status/:id")
+    .put(authGuardAdmin, billController.updateStatus)
+    .all(methodNotAllowed);
+
+router.route("/update-payment/:id")
+    .put(billController.updatePaymentStatus)
+    .all(methodNotAllowed);
+
+router.route("/checkout/:id")
+    .put(billController.updateCheckout)
+    .all(methodNotAllowed);
+
+router.route("/delete-order/:id")
+    .delete(authGuardAdmin, billController.deleteOrder)
+    .all(methodNotAllowed);
+
+router.route("/get-orders/:userId")
+    .get(billController.getUserOrder)
+    .all(methodNotAllowed);
 
 module.exports = router;
