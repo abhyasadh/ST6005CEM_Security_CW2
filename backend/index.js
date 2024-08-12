@@ -15,9 +15,9 @@ const app = express();
 
 // CORS Policy
 const corsPolicy = {
-    origin: ["http://localhost:3000", "https://localhost:3000"],
+    origin: ["https://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-    optionSuccessStatus: 200
 }
 app.use(cors(corsPolicy))
 
