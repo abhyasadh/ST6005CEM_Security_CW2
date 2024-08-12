@@ -31,7 +31,7 @@ const authGuardAdmin = (req, res, next) => {
   } catch (error) {
       res.json({
           success: false,
-          message: "Invalid token!"
+          message: error.message
       }
       )
   }

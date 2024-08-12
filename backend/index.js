@@ -8,10 +8,18 @@ const cors = require('cors');
 const multiparty = require('connect-multiparty');
 const cloudinary = require('cloudinary');
 const { initialize } = require('./socketManager');
-const http = require("http");
+const https = require("https");
+const fs = require("fs");
+
+// Connect to MongoDB
+connectDB();
 
 // Making Express App
+const PORT = process.env.PORT;
 const app = express();
+
+const key = fs.readFileSync('ssl/localhost+2-key.pem');
+const cert = fs.readFileSync('ssl/localhost+2.pem');
 
 // CORS Policy
 const corsPolicy = {
@@ -19,12 +27,8 @@ const corsPolicy = {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
 }
+
 app.use(cors(corsPolicy))
-
-// Connect to MongoDB
-connectDB();
-
-// Body Parser
 app.use(express.json());
 app.use(multiparty());
 
@@ -36,9 +40,8 @@ cloudinary.config({
 });
 
 // Server Port
-const PORT = process.env.PORT;
-const server = app.listen(PORT, ()=>{
-    console.log(`Server is running on port: ${PORT}`.white.bold);
+const server = https.createServer({key, cert}, app).listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`.white.bold);
 });
 initialize(server);
 

@@ -14,12 +14,12 @@ import Orders from './pages/admin/Orders';
 import Settings from './pages/admin/Settings';
 import Menu from './pages/admin/Menu';
 import Home from './pages/user/Home';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import socketIO from 'socket.io-client';
 
-const socket = socketIO.connect('http://localhost:5000');
+const socket = socketIO.connect('https://localhost:5000');
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
