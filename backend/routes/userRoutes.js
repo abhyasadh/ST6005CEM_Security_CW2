@@ -8,6 +8,10 @@ function methodNotAllowed(req, res) {
 }
 
 // Define routes with method not allowed handling
+router.route('/session')
+    .get(userController.getSession)
+    .all(methodNotAllowed);
+
 router.route('/signup')
     .post(userController.createUser)
     .all(methodNotAllowed);
@@ -26,6 +30,10 @@ router.route('/verify-otp')
 
 router.route('/reset-password/:number')
     .put(userController.resetPassword)
+    .all(methodNotAllowed);
+
+router.route('/logout')
+    .post(userController.logoutUser)
     .all(methodNotAllowed);
 
 module.exports = router;

@@ -1,40 +1,22 @@
-const jwt = require("jsonwebtoken");
-
 const authGuardAdmin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.json({
+  // Check if session data is available
+  if (!req.session.user) {
+    return res.status(401).json({
       success: false,
-      message: "Authorization header not found!",
+      message: "Unauthorized! Please log in.",
     });
   }
 
-  const token = authHeader.split(' ')[1];
-  if (!token) {
-    return res.json({
+  // Check if the user is an admin
+  if (!req.session.user.isAdmin) {
+    return res.status(403).json({
       success: false,
-      message: "Token is required!",
+      message: "Permission Denied! Admins only.",
     });
   }
 
-  try {
-      const decodeUser = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
-      req.user = decodeUser;
+  // Proceed to the next middleware or route handler
+  next();
+};
 
-      if (!req.user.isAdmin) {
-          return res.json({
-              success: false,
-              message: "Permission Denied!"
-          })
-      }
-      next();
-  } catch (error) {
-      res.json({
-          success: false,
-          message: error.message
-      }
-      )
-  }
-}
-
-module.exports = {authGuardAdmin};
+module.exports = { authGuardAdmin };

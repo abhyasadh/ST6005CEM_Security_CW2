@@ -1,3 +1,4 @@
+// Imports
 const Users = require("../model/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -5,9 +6,16 @@ const dotenv = require("dotenv").config();
 const client = require("twilio")(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 const crypto = require('crypto');
 
+// OTP settings
+const OTP_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
+const MAX_OTP_ATTEMPTS = 3;
+
 // Lockout settings
 const MAX_FAILED_ATTEMPTS = 4;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+// In-memory store for OTP data (you can use a persistent store like Redis in production)
+let otpData = {};
 
 // Function to hash phone numbers
 function hashPhoneNumber(phoneNumber) {
@@ -16,7 +24,12 @@ function hashPhoneNumber(phoneNumber) {
 
 //============================================= FOR OTP VERIFICATION =====================================================
 
-let sharedOTP = '';
+const getSession = (req, res) => {
+    if (req.session.user) {
+        return res.status(200).json({ success: true, user: req.session.user });
+      }
+      return res.status(200).json({ success: false, message: "No active session" });
+}
 
 const sendOtp = async (req, res) => {
     const { phone, purpose } = req.body;
@@ -28,59 +41,44 @@ const sendOtp = async (req, res) => {
         });
     }
 
-    sharedOTP = '';
+    const hashedPhone = hashPhoneNumber(phone);
+    let otp = '';
     for (let i = 0; i < 6; i++) {
-        sharedOTP += Math.floor(Math.random() * 10);
+        otp += Math.floor(Math.random() * 10);
     }
 
-    const hashedPhone = hashPhoneNumber(phone);
+    const otpEntry = {
+        otp: otp,
+        attempts: 0,
+        expiresAt: Date.now() + OTP_EXPIRY_TIME,
+    };
 
-    if (purpose == "Signup") {
-        try {
-            const sms = async (body) => {
-                let msgOptions = {
-                    from: process.env.FROM_NUMBER,
-                    to: process.env.TO_NUMBER,
-                    body,
-                };
-                try {
-                    const message = await client.messages.create(msgOptions);
-                    console.log(message);
-                } catch (error) {
-                    res.json(error);
-                }
-            };
+    otpData[hashedPhone] = otpEntry; // Store OTP data in memory (or use Redis)
 
-            console.log(`Your OTP for DishDash account is: ${sharedOTP}`);
-
-            return res.status(200).json({
-                success: true,
-            });
-        } catch (error) {
-            res.json(error);
-        }
-    } else if (purpose == "Reset") {
+    if (purpose === "Reset") {
         try {
             const existingUser = await Users.findOne({ hashedPhone: hashedPhone });
             if (existingUser) {
+                // Send OTP via SMS
                 const sms = async (body) => {
                     let msgOptions = {
                         from: process.env.FROM_NUMBER,
-                        to: process.env.TO_NUMBER,
+                        to: phone,
                         body,
                     };
                     try {
                         const message = await client.messages.create(msgOptions);
                         console.log(message);
                     } catch (error) {
-                        res.json(error);
+                        return res.status(500).json({ success: false, message: "Failed to send OTP." });
                     }
                 };
 
-                sms(`Use this code to reset your password: ${sharedOTP}`);
+                sms(`Use this code to reset your password: ${otp}`);
 
                 return res.status(200).json({
                     success: true,
+                    message: "OTP sent successfully!"
                 });
             } else {
                 return res.json({
@@ -89,20 +87,56 @@ const sendOtp = async (req, res) => {
                 });
             }
         } catch (error) {
-            res.json(error);
+            console.log(error);
+            return res.status(500).json({ success: false, message: "Server error." });
         }
+    } else {
+        return res.status(400).json({ success: false, message: "Invalid request." });
     }
 };
 
 const verifyOTP = async (req, res) => {
-    const { otp } = req.body;
+    const { phone, otp } = req.body;
+    const hashedPhone = hashPhoneNumber(phone);
 
-    if (!otp || otp != sharedOTP) {
+    if (!otpData[hashedPhone]) {
+        return res.json({
+            success: false,
+            message: "OTP not found. Please request a new OTP.",
+        });
+    }
+
+    const { otp: storedOtp, attempts, expiresAt } = otpData[hashedPhone];
+
+    if (Date.now() > expiresAt) {
+        delete otpData[hashedPhone]; // Remove expired OTP
+        return res.json({
+            success: false,
+            message: "OTP expired. Please request a new OTP.",
+        });
+    }
+
+    if (attempts >= MAX_OTP_ATTEMPTS) {
+        delete otpData[hashedPhone]; // Remove OTP after max attempts
+        return res.json({
+            success: false,
+            message: "Maximum OTP attempts reached. Please request a new OTP.",
+        });
+    }
+
+    if (otp !== storedOtp) {
+        otpData[hashedPhone].attempts += 1; // Increment failed attempt count
         return res.json({
             success: false,
             message: "Incorrect OTP!",
         });
     }
+
+    // Clear OTP data after successful verification
+    delete otpData[hashedPhone];
+
+    // Store the user's phone in session for the next step
+    req.session.resetPhone = hashedPhone;
 
     return res.json({
         success: true,
@@ -172,7 +206,7 @@ const createUser = async (req, res) => {
         const newUser = new Users({
             firstName: firstName,
             lastName: lastName,
-            hashedPhone: hashedPhone,
+            phone: hashedPhone,
             password: encryptedPassword,
             previousPasswords: [],
             passwordCreated: new Date(),
@@ -186,6 +220,7 @@ const createUser = async (req, res) => {
             message: "Registration successful!",
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json(error);
     }
 };
@@ -202,7 +237,7 @@ const loginUser = async (req, res) => {
 
     try {
         const hashedPhone = hashPhoneNumber(phone);
-        const user = await Users.findOne({ hashedPhone: hashedPhone });
+        const user = await Users.findOne({ phone: hashedPhone });
         if (!user) {
             return res.json({
                 success: false,
@@ -250,14 +285,19 @@ const loginUser = async (req, res) => {
                 message: "Password change required. It's been over 90 days since your last password update.",
             });
         }
-
-        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_TOKEN_SECRET);
+        
+        req.session.user = {
+            id: user._id,
+            phone: user.phone,
+            isAdmin: user.isAdmin,
+        };
 
         res.status(200).json({
             success: true,
-            token: token,
-            userData: user,
             message: "Login Successful!",
+            userData: {
+                isAdmin: user.isAdmin,
+            }
         });
     } catch (error) {
         console.log(error);
@@ -265,26 +305,37 @@ const loginUser = async (req, res) => {
     }
 };
 
-const resetPassword = async (req, res) => {
-    const phone = req.params.number;
-    const { password } = req.body;
+const logoutUser = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ success: false, message: "Error logging out." });
+        }
+        res.clearCookie("connect.sid"); // Clear the session cookie
+        res.status(200).json({ success: true, message: "Logged out successfully!" });
+    });
+};
 
-    if (!phone) {
+const resetPassword = async (req, res) => {
+    const { password } = req.body;
+    const hashedPhone = req.session.resetPhone;
+
+    if (!hashedPhone) {
         return res.json({
             success: false,
-            message: "Invalid phone number!",
+            message: "Session expired or invalid session. Please request password reset again.",
         });
     }
 
     try {
-        const hashedPhone = hashPhoneNumber(phone);
-        const existingUser = await Users.findOne({ hashedPhone: hashedPhone });
+        const existingUser = await Users.findOne({ phone: hashedPhone });
         if (!existingUser) {
             return res.json({
                 success: false,
                 message: "User not found!",
             });
         } else {
+            // Check against previous passwords
             for (let oldPassword of existingUser.previousPasswords) {
                 const match = await bcrypt.compare(password, oldPassword);
                 if (match) {
@@ -307,6 +358,9 @@ const resetPassword = async (req, res) => {
             existingUser.passwordCreated = new Date();
             await existingUser.save();
 
+            // Clear the reset session
+            delete req.session.resetPhone;
+
             return res.status(200).json({
                 success: true,
                 message: "Password reset successfully!",
@@ -319,9 +373,11 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
+    getSession,
     createUser,
     loginUser,
     sendOtp,
     verifyOTP,
     resetPassword,
+    logoutUser,
 };

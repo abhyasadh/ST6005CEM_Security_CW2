@@ -10,6 +10,8 @@ const cloudinary = require('cloudinary');
 const { initialize } = require('./socketManager');
 const https = require("https");
 const fs = require("fs");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 // Connect to MongoDB
 connectDB();
@@ -28,30 +30,42 @@ const corsPolicy = {
     credentials: true,
 }
 
-app.use(cors(corsPolicy))
+app.use(cors(corsPolicy));
 app.use(express.json());
 app.use(multiparty());
 
 // Cloudinary Config
-cloudinary.config({ 
-    cloud_name: process.env.CLOUD_NAME, 
-    api_key: process.env.API_KEY, 
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET,
 });
 
+// Session Configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: true,
+        maxAge: 30000 * 60 * 60 * 24,
+        httpOnly: false,
+    }
+}));
+
 // Server Port
-const server = https.createServer({key, cert}, app).listen(PORT, () => {
+const server = https.createServer({ key, cert }, app).listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`.white.bold);
 });
 initialize(server);
 
 // Routes
-app.use('/api/user', require('./routes/userRoutes'))
-app.use('/api/category', require('./routes/categoryRoutes'))
-app.use('/api/food', require('./routes/foodRoutes'))
-app.use('/api/order', require('./routes/billRoutes'))
-app.use('/api/favourites', require('./routes/favouritesRoutes'))
-app.use('/api/tables', require('./routes/tableRoutes'))
+app.use('/api/user', require('./routes/userRoutes'));
+app.use('/api/category', require('./routes/categoryRoutes'));
+app.use('/api/food', require('./routes/foodRoutes'));
+app.use('/api/order', require('./routes/billRoutes'));
+app.use('/api/favourites', require('./routes/favouritesRoutes'));
+app.use('/api/tables', require('./routes/tableRoutes'));
 
 // Exporting App
 module.exports = app;
