@@ -20,7 +20,23 @@ const userSchema = mongoose.Schema({
     isAdmin:{
         type: Boolean,
         default: false
-    }
+    },
+    previousPasswords: {
+        type: [String],
+        default: []
+    },
+    passwordCreated: {
+        type: Date,
+        required: true
+    },
+    failedLoginAttempts: {
+        type: Number,
+        default: 0
+    },
+    accountLockedUntil: {
+        type: Date,
+        default: null
+    },
 })
 
 const User = mongoose.model('user', userSchema);

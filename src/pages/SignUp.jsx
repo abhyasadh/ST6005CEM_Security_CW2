@@ -103,9 +103,11 @@ const SignUp = () => {
       firstName === "" ||
       lastName === "" ||
       phone === "" ||
-      password === ""
+      password === "" ||
+      confirmPassword === ""
     ) {
       validationErrors.push("All fields are required!");
+      return validationErrors;
     }
     if (!firstName.match(/^[a-zA-Z]+$/)) {
       validationErrors.push("Invalid first name!");
@@ -116,25 +118,29 @@ const SignUp = () => {
     if (!phone.match(/^[0-9]+$/)) {
       validationErrors.push("Invalid phone number!");
     }
-    if (
-      !password.match(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()-+=_{}[\]:;<>,.?/~]).{9,}$/
-      )
-    ) {
-      validationErrors.push(
-        <div>
-          Password must contain:
-          <br />
-          - An uppercase letter,
-          <br />
-          - A lowercase letter,
-          <br />
-          - A number,
-          <br />
-          - A special character,
-          <br />- Minimum 8 characters
-        </div>
-      );
+    if (!/[A-Z]/.test(password)) {
+      validationErrors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(password)) {
+      validationErrors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!/\d/.test(password)) {
+      validationErrors.push("Password must contain at least one number.");
+    }
+    if (!/[!@#$%^&*()\-=+_{}[\]:;<>,.?/~]/.test(password)) {
+      validationErrors.push("Password must contain at least one special character.");
+    }
+    if (password.length < 8) {
+      validationErrors.push("Password must be at least 8 characters long.");
+    }
+    if (firstName && password.toLowerCase().includes(firstName.toLowerCase())) {
+      validationErrors.push("Password should not contain your first name.");
+    }
+    if (lastName && password.toLowerCase().includes(lastName.toLowerCase())) {
+      validationErrors.push("Password should not contain your last name.");
+    }
+    if (phone && password.includes(phone)) {
+      validationErrors.push("Password should not contain your phone number.");
     }
     if (password !== confirmPassword) {
       validationErrors.push("Passwords don't match!");

@@ -7,46 +7,77 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Function to validate the new password
+  const validatePassword = (password) => {
+    const errors = [];
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long.");
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!/\d/.test(password)) {
+      errors.push("Password must contain at least one number.");
+    }
+    if (!/[!@#$%^&*()\-=+_{}[\]:;<>,.?/~]/.test(password)) {
+      errors.push("Password must contain at least one special character.");
+    }
+    return errors;
+  };
+
   const changePassword = (e) => {
     e.preventDefault();
 
-    const data = {
-      phone: JSON.parse(localStorage.getItem("user")).phone,
+    // Validate the new password
+    const passwordErrors = validatePassword(newPassword);
+    if (passwordErrors.length > 0) {
+      passwordErrors.forEach((error) => toast.error(error));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const loginData = {
+      phone: user.phone,
       password: oldPassword,
     };
 
-    loginApi(data)
+    // Verify old password by re-authenticating
+    loginApi(loginData)
       .then((res) => {
-        if (res.data.success === false) {
-          toast.error(res.data.message);
+        if (!res.data.success) {
+          toast.error(res.data.message || "Authentication failed.");
         } else {
-          if (newPassword === confirmPassword) {
-            const data = {
-              password: newPassword,
-            };
-            recoverPasswordApi(JSON.parse(localStorage.getItem("user")).phone, data)
-              .then((res) => {
-                if (res.data.success === false) {
-                  toast.error("Password change unsuccessful!");
-                } else {
-                  toast.success("Password changed successfully!");
-                  setConfirmPassword("");
-                  setNewPassword("");
-                  setOldPassword("");
-                }
-              })
-              .catch((err) => {
-                toast.error("Server error!");
-                console.log(err.message);
-              });
-          } else {
-            toast.error("Passwords do not match!");
-          }
+          const passwordData = {
+            password: newPassword,
+          };
+          recoverPasswordApi(user.phone, passwordData)
+            .then((res) => {
+              if (!res.data.success) {
+                toast.error(res.data.message || "Password change unsuccessful!");
+              } else {
+                toast.success("Password changed successfully!");
+                setOldPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }
+            })
+            .catch((err) => {
+              toast.error("Server error during password change.");
+              console.error(err.message);
+            });
         }
       })
       .catch((err) => {
-        toast.error("Server error!");
-        console.log(err.message);
+        toast.error("Server error during authentication.");
+        console.error(err.message);
       });
   };
 
