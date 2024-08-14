@@ -1,31 +1,41 @@
 const Foods = require("../model/foodModel");
-const cloudinary = require("cloudinary")
+const cloudinary = require("cloudinary");
+const fileType = require("file-type");
 
 const createFood = async (req, res) => {
+    const { foodName, foodPrice, foodTime, foodCategory } = req.body;
+    const { foodImage } = req.files;
 
-    const {foodName, foodPrice, foodTime, foodCategory} = req.body
-    const {foodImage} = req.files;
-
-    if (!foodName || !foodPrice || !foodTime || !foodCategory || !foodImage){
+    if (!foodName || !foodPrice || !foodTime || !foodCategory || !foodImage) {
         return res.json({
             success: false,
             message: "Please fill all fields!"
-        })
+        });
     }
 
     try {
+        const fileBuffer = fs.readFileSync(foodImage.path);
+        const mimeInfo = await fileType.fromBuffer(fileBuffer);
+
+        if (!mimeInfo || !mimeInfo.mime.startsWith('image/')) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid file type. Please upload an image."
+            });
+        }
+
         const uploadedImage = await cloudinary.v2.uploader.upload(
-            foodImage.path,{
+            foodImage.path, {
                 folder: "Foods",
                 crop: "scale"
             }
-        )
+        );
 
         const newFood = new Foods({
-            foodName : foodName,
-            foodPrice : foodPrice,
-            foodTime : foodTime,
-            foodCategory : foodCategory,
+            foodName: foodName,
+            foodPrice: foodPrice,
+            foodTime: foodTime,
+            foodCategory: foodCategory,
             foodImageUrl: uploadedImage.secure_url
         });
 
@@ -34,12 +44,12 @@ const createFood = async (req, res) => {
             success: true,
             message: "Food added successfully!",
             data: newFood
-        })
+        });
     } catch (error) {
         console.log(error);
-        res.status(500).json("Server Error")
+        res.status(500).json("Server Error");
     }
-}
+};
 
 const getAllFood = async (req, res) => {
     try {
@@ -111,65 +121,74 @@ const unavailableFood = async (req, res) => {
 }
 
 const updateFood = async (req, res) => {
-    const id = req.params.id
-    if (!id){
+    const id = req.params.id;
+    if (!id) {
         return res.json({
             success: false,
             message: "Food Id is required!"
-        })
+        });
     }
 
-    const {foodName, foodPrice, foodTime, foodCategory} = req.body;
-    const {foodImage} = req.files;
+    const { foodName, foodPrice, foodTime, foodCategory } = req.body;
+    const { foodImage } = req.files;
 
-    if ((!foodName || !foodPrice || !foodTime || !foodCategory)){
+    if ((!foodName || !foodPrice || !foodTime || !foodCategory)) {
         return res.json({
             success: false,
             message: "Please fill all fields!"
-        })
+        });
     }
 
-    try{
-        if (foodImage){
+    try {
+        let updatedFood;
+
+        if (foodImage) {
+            const fileBuffer = fs.readFileSync(foodImage.path);
+            const mimeInfo = await fileType.fromBuffer(fileBuffer);
+
+            if (!mimeInfo || !mimeInfo.mime.startsWith('image/')) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid file type. Please upload an image."
+                });
+            }
+
             const uploadedImage = await cloudinary.v2.uploader.upload(
-                foodImage.path,{
+                foodImage.path, {
                     folder: "Foods",
                     crop: "scale"
                 }
-            )
-            const updatedFood = await Foods.findByIdAndUpdate(id, {
-                foodName : foodName,
-                foodPrice : foodPrice,
-                foodTime : foodTime,
-                foodCategory : foodCategory,
+            );
+
+            updatedFood = await Foods.findByIdAndUpdate(id, {
+                foodName: foodName,
+                foodPrice: foodPrice,
+                foodTime: foodTime,
+                foodCategory: foodCategory,
                 foodImageUrl: uploadedImage.secure_url
-            })
-            res.status(200).json({
-                success: true,
-                message: "Food updated successfully!",
-                data: updatedFood
-            })
+            });
         } else {
-            const updatedFood = await Foods.findByIdAndUpdate(id, {
-                foodName : foodName,
-                foodPrice : foodPrice,
-                foodTime : foodTime,
-                foodCategory : foodCategory,
-            })
-            res.status(200).json({
-                success: true,
-                message: "Food updated successfully!",
-                data: updatedFood
-            })
+            updatedFood = await Foods.findByIdAndUpdate(id, {
+                foodName: foodName,
+                foodPrice: foodPrice,
+                foodTime: foodTime,
+                foodCategory: foodCategory,
+            });
         }
-    } catch (error){
+
+        res.status(200).json({
+            success: true,
+            message: "Food updated successfully!",
+            data: updatedFood
+        });
+    } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             message: "Server Error"
-        })        
+        });
     }
-}
+};
 
 const deleteFood = async (req, res) => {
     try {

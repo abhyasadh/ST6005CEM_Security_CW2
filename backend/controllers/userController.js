@@ -53,45 +53,39 @@ const sendOtp = async (req, res) => {
         expiresAt: Date.now() + OTP_EXPIRY_TIME,
     };
 
-    otpData[hashedPhone] = otpEntry; // Store OTP data in memory (or use Redis)
+    otpData[hashedPhone] = otpEntry;
 
-    if (purpose === "Reset") {
-        try {
+    try {
+        if (purpose === "Reset") {
             const existingUser = await Users.findOne({ hashedPhone: hashedPhone });
-            if (existingUser) {
-                // Send OTP via SMS
-                const sms = async (body) => {
-                    let msgOptions = {
-                        from: process.env.FROM_NUMBER,
-                        to: phone,
-                        body,
-                    };
-                    try {
-                        const message = await client.messages.create(msgOptions);
-                        console.log(message);
-                    } catch (error) {
-                        return res.status(500).json({ success: false, message: "Failed to send OTP." });
-                    }
-                };
-
-                sms(`Use this code to reset your password: ${otp}`);
-
-                return res.status(200).json({
-                    success: true,
-                    message: "OTP sent successfully!"
-                });
-            } else {
+            if (!existingUser) {
                 return res.json({
                     success: false,
                     message: "User not found!",
                 });
             }
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({ success: false, message: "Server error." });
         }
-    } else {
-        return res.status(400).json({ success: false, message: "Invalid request." });
+
+        const messageBody = purpose === "Reset" 
+            ? `Use this code to reset your password: ${otp}`
+            : `Use this code to create account: ${otp}`;
+
+        const msgOptions = {
+            from: process.env.FROM_NUMBER,
+            to: process.env.TO_NUMBER,
+            body: messageBody,
+        };
+
+        await client.messages.create(msgOptions);
+
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent successfully!",
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Failed to send OTP." });
     }
 };
 
