@@ -7,7 +7,6 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.2",
-    "chart.js": "^4.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
@@ -18,11 +17,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "secureStart": "set HTTPS=true&&set SSL_CRT_FILE=backend/ssl/localhost+2.pem&&set SSL_KEY_FILE=backend/ssl/localhost+2-key.pem&&react-scripts start",
-    "secureBuild": "set \"GENERATE_SOURCEMAP=false\"&&react-scripts build",
-    "secureDeploy": "cross-env NODE_ENV=production serve -s build --listen 3000 --ssl-cert backend/ssl/localhost+2-key.pem --ssl-key backend/ssl/localhost+2.pem",
+    "start": "set HTTPS=true&&set SSL_CRT_FILE=ssl/localhost+2.pem&&set SSL_KEY_FILE=ssl/localhost+2-key.pem&&react-scripts start",
+    "build": "set \"GENERATE_SOURCEMAP=false\"&&react-scripts build",
+    "secureDeploy": "cross-env NODE_ENV=production serve -s build --listen 3000 --ssl-cert ssl/localhost+2-key.pem --ssl-key ssl/localhost+2.pem",
     "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
     "eject": "react-scripts eject"
   },

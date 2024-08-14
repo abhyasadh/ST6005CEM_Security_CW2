@@ -346,6 +346,31 @@ const resetPassword = async (req, res) => {
                 }
             }
 
+            let validationErrors = [];
+
+            if (!/[A-Z]/.test(password)) {
+                validationErrors.push("Password must contain at least one uppercase letter.");
+            }
+            if (!/[a-z]/.test(password)) {
+                validationErrors.push("Password must contain at least one lowercase letter.");
+            }
+            if (!/\d/.test(password)) {
+                validationErrors.push("Password must contain at least one number.");
+            }
+            if (!/[!@#$%^&*()\-=+_{}[\]:;<>,.?/~]/.test(password)) {
+                validationErrors.push("Password must contain at least one special character.");
+            }
+            if (password.length < 8) {
+                validationErrors.push("Password must be at least 8 characters long.");
+            }
+            if (existingUser.firstName && password.toLowerCase().includes(existingUser.firstName.toLowerCase())) {
+                validationErrors.push("Password should not contain your first name.");
+            }
+            if (existingUser.lastName && password.toLowerCase().includes(existingUser.lastName.toLowerCase())) {
+                validationErrors.push("Password should not contain your last name.");
+            }
+            if (validationErrors.length > 0) return res.json({ success: false, message: validationErrors.join("\n") });
+
             const salt = await bcrypt.genSalt(10);
             const encryptedPassword = await bcrypt.hash(password, salt);
 
@@ -372,6 +397,83 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+  
+    // Ensure the user is authenticated
+    if (!req.session.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized! Please log in.",
+      });
+    }
+  
+    try {
+      // Fetch the user from the database
+      const user = await Users.findById(req.session.user.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found!",
+        });
+      }
+  
+      // Verify the current password
+      const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(400).json({
+          success: false,
+          message: "Incorrect current password!",
+        });
+      }
+  
+      let validationErrors = [];
+
+    if (!/[A-Z]/.test(newPassword)) {
+        validationErrors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(newPassword)) {
+        validationErrors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!/\d/.test(newPassword)) {
+        validationErrors.push("Password must contain at least one number.");
+    }
+    if (!/[!@#$%^&*()\-=+_{}[\]:;<>,.?/~]/.test(newPassword)) {
+        validationErrors.push("Password must contain at least one special character.");
+    }
+    if (newPassword.length < 8) {
+        validationErrors.push("Password must be at least 8 characters long.");
+    }
+    if (user.firstName && newPassword.toLowerCase().includes(user.firstName.toLowerCase())) {
+        validationErrors.push("Password should not contain your first name.");
+    }
+    if (user.lastName && newPassword.toLowerCase().includes(user.lastName.toLowerCase())) {
+        validationErrors.push("Password should not contain your last name.");
+    }
+    if (validationErrors.length > 0) return res.json({ success: false, message: validationErrors.join("\n") });
+  
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+  
+      // Update the user's password in the database
+      user.password = hashedPassword;
+      user.passwordCreated = new Date();
+      await user.save();
+  
+      res.status(200).json({
+        success: true,
+        message: "Password changed successfully!",
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server error. Please try again later.",
+      });
+    }
+  };
+
 module.exports = {
     getSession,
     createUser,
@@ -379,5 +481,6 @@ module.exports = {
     sendOtp,
     verifyOTP,
     resetPassword,
+    changePassword,
     logoutUser,
 };

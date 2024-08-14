@@ -4,31 +4,22 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
 const Login = ({ onLogin }) => {
-  //useState (Setting input value)
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
-  //function for button
   const handleSubmit = (e) => {
     e.preventDefault();
-    //check if the data input value is available
-    console.log(phone, password);
 
-    //making json data
     const data = {
       phone: phone,
       password: password,
     };
 
-    //making api call
     loginApi(data)
       .then((res) => {
         if (res.data.success === false) {
           toast.error(res.data.message);
         } else {
-          toast.success(res.data.message);
-
-          localStorage.setItem("token", res.data.token);
           onLogin(res.data.userData);
         }
       })

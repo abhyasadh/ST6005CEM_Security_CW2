@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { loginApi, recoverPasswordApi } from "../../apis/API";
+import { changePasswordApi } from "../../apis/API";
 
 const Settings = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -43,41 +43,23 @@ const Settings = () => {
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const loginData = {
-      phone: user.phone,
-      password: oldPassword,
+    const passwordData = {
+      currentPassword: oldPassword, newPassword: newPassword,
     };
-
-    // Verify old password by re-authenticating
-    loginApi(loginData)
+    changePasswordApi(passwordData)
       .then((res) => {
-        if (!res.data.success) {
-          toast.error(res.data.message || "Authentication failed.");
+        if (res.status === 400) {
+          toast.error(res.data.message || "Password change unsuccessful!");
         } else {
-          const passwordData = {
-            password: newPassword,
-          };
-          recoverPasswordApi(user.phone, passwordData)
-            .then((res) => {
-              if (!res.data.success) {
-                toast.error(res.data.message || "Password change unsuccessful!");
-              } else {
-                toast.success("Password changed successfully!");
-                setOldPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }
-            })
-            .catch((err) => {
-              toast.error("Server error during password change.");
-              console.error(err.message);
-            });
+          toast.success("Password changed successfully!");
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
         }
       })
       .catch((err) => {
-        toast.error("Server error during authentication.");
-        console.error(err.message);
+        toast.error("Server error during password change.");
+        console.log(err.message);
       });
   };
 

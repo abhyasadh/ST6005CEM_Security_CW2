@@ -28,8 +28,12 @@ router.route('/verify-otp')
     .post(userController.verifyOTP)
     .all(methodNotAllowed);
 
-router.route('/reset-password/:number')
+router.route('/reset-password')
     .put(userController.resetPassword)
+    .all(methodNotAllowed);
+
+router.route('/change-password')
+    .put(userController.changePassword)
     .all(methodNotAllowed);
 
 router.route('/logout')

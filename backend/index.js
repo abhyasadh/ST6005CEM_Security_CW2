@@ -1,4 +1,3 @@
-// Imports
 const express = require("express");
 const colors = require("colors");
 const dotenv = require("dotenv").config();
@@ -12,6 +11,11 @@ const https = require("https");
 const fs = require("fs");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const { logRequests } = require('./middleware/logs');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
 
 // Connect to MongoDB
 connectDB();
@@ -20,46 +24,62 @@ connectDB();
 const PORT = process.env.PORT;
 const app = express();
 
-const key = fs.readFileSync('ssl/localhost+2-key.pem');
-const cert = fs.readFileSync('ssl/localhost+2.pem');
+const key = fs.readFileSync('../ssl/localhost+2-key.pem');
+const cert = fs.readFileSync('../ssl/localhost+2.pem');
 
 // CORS Policy
 const corsPolicy = {
-    origin: ["https://localhost:3000"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-}
+  origin: ["https://localhost:3000"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
 
 app.use(cors(corsPolicy));
 app.use(express.json());
 app.use(multiparty());
+app.use(mongoSanitize());
+app.use(helmet());
+app.use(cookieParser());
 
 // Cloudinary Config
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
 });
 
 // Session Configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: true,
-        maxAge: 30000 * 60 * 60 * 24,
-        httpOnly: false,
-    }
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.DB_URL, // Add your MongoDB URI here
+  }),
+  cookie: {
+    secure: true,
+    maxAge: 30000 * 60 * 60 * 24, // 30 Days
+    httpOnly: true, // Set to true for better security
+  },
 }));
+
+// CSRF Protection Middleware
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+
+// Serve CSRF token to frontend
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 // Server Port
 const server = https.createServer({ key, cert }, app).listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`.white.bold);
+  console.log(`Server is running on port ${PORT}`.white.bold);
 });
 initialize(server);
 
 // Routes
+app.use(logRequests);
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/category', require('./routes/categoryRoutes'));
 app.use('/api/food', require('./routes/foodRoutes'));

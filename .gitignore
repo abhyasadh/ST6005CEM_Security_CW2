@@ -4,7 +4,9 @@
 /node_modules
 /backend/node_modules
 /backend/.env
-/backend/ssl
+/super-admin/node_modules
+/super-admin/.env
+/ssl
 /.pnp
 .pnp.js
 
